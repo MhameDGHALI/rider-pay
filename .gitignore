@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+
+# Secrets et identifiants (ne jamais versionner)
+.env
+profiles.yml
+*.key
+*credentials*.json
+service-account*.json
+
+# Données volumineuses (reproductibles par script)
+data/raw/
+data/processed/
+
+# Power BI (optionnel)
+# *.pbix
