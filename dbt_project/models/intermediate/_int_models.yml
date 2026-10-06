@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: int_trip_economics
+    description: >
+      Une ligne par course. Ajoute à stg_hvfhv_trips des variables de calendrier, des mesures
+      économiques (marge plateforme, rémunération par heure et par mile de course), des durées
+      d'attente et des indicateurs d'anomalies. Aucune ligne n'est supprimée.
+    columns:
+      - name: trip_id
+        description: "Identifiant de la course, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: pickup_hour_start_at
+        description: "Heure de prise en charge arrondie à l'heure pleine (DATETIME). Sert à joindre la météo horaire."
+        data_tests:
+          - not_null
+      - name: pickup_day_of_week
+        description: "Jour de la semaine de la prise en charge : 1 = dimanche, 7 = samedi (convention BigQuery)."
+      - name: is_weekend
+        description: "Vrai si la prise en charge a lieu un samedi ou un dimanche."
+      - name: platform_margin_usd
+        description: "Tarif de base moins rémunération du chauffeur. Marge brute APPROXIMATIVE : le tarif de base exclut taxes, péages et frais, et la définition exacte de driver_pay est à confirmer dans le dictionnaire TLC."
+      - name: platform_margin_rate
+        description: "Marge divisée par le tarif de base. Vide si le tarif de base est nul ou négatif."
+      - name: driver_pay_per_trip_hour_usd
+        description: "Rémunération divisée par la durée de la course, ramenée à l'heure. Ce n'est PAS un salaire horaire : le temps d'attente entre deux courses n'est pas compté."
+      - name: driver_pay_per_mile_usd
+        description: "Rémunération divisée par la distance en miles. Vide si la distance est nulle."
+      - name: driver_earnings_with_tips_usd
+        description: "driver_pay + pourboire. À confirmer : cela suppose que driver_pay n'inclut pas le pourboire (voir le dictionnaire TLC)."
+      - name: seconds_request_to_on_scene
+        description: "Secondes entre la demande du client et l'arrivée du chauffeur sur place."
+      - name: seconds_on_scene_to_pickup
+        description: "Secondes entre l'arrivée du chauffeur et la prise en charge du client."
+      - name: seconds_request_to_pickup
+        description: "Secondes entre la demande du client et sa prise en charge."
+      - name: has_negative_driver_pay
+        description: "Rémunération négative."
+      - name: has_zero_driver_pay
+        description: "Rémunération nulle."
+      - name: has_nonpositive_fare
+        description: "Tarif de base nul ou négatif."
+      - name: has_nonpositive_distance
+        description: "Distance nulle ou négative."
+      - name: has_nonpositive_duration
+        description: "Durée nulle ou négative."
+      - name: has_inconsistent_duration
+        description: "trip_seconds diffère de plus d'une seconde de l'écart entre prise en charge et dépose."
+      - name: has_timeline_anomaly
+        description: "Chronologie incohérente : demande après l'arrivée, ou arrivée après la prise en charge. Non inclus dans is_clean_trip tant que son volume n'est pas mesuré."
+      - name: is_clean_trip
+        description: "Vrai si aucun des six premiers indicateurs d'anomalie n'est levé. À utiliser pour les moyennes et comparaisons."
+        data_tests:
+          - not_null
