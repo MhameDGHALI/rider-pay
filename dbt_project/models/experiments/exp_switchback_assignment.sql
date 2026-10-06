@@ -4,6 +4,7 @@
 -- Chaque strate est ainsi équilibrée à une unité près. Une strate de taille impaire donne son
 -- unité en plus au test ou au contrôle selon un tirage propre à la strate (pas de biais systématique).
 -- La répartition ne dépend d'aucun résultat : seuls l'identifiant et la graine interviennent.
+-- is_disturbed_day marque les unités retirées de l'analyse de sensibilité (exploratoire).
 
 with units as (
 
@@ -40,5 +41,6 @@ select
     driver_pay_usd,
     snow_hours,
     rank_in_stratum,
-    if(mod(rank_in_stratum + stratum_flip, 2) = 1, 'treatment', 'control') as arm
+    if(mod(rank_in_stratum + stratum_flip, 2) = 1, 'treatment', 'control') as arm,
+    unit_date in (select disturbed_date from {{ ref('exp_disturbed_dates') }}) as is_disturbed_day
 from ranked

@@ -39,6 +39,18 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 | 30 | 12 | Décomposition du coût par règle : étendue, intensité, part du scénario | Coût = intensité × étendue. La neige paie 3,00 $ par course concernée mais touche 5,3 % des courses ; la pointe paie 1,50 $ et en touche 31,4 %. | Ne garder que le coût total du scénario |
 | 31 | 12 | Heures de pointe définies sur la demande réelle : heures de semaine dont la part de la demande dépasse 1,25 fois la demande uniforme (5,2 %), soit 8h-9h59 et 16h-21h59 | La vérification a montré que l'hypothèse de départ (7h-9h59 et 16h-19h59, 39,8 % de la demande de semaine, 5 026 988 $) manquait deux heures fortes (20h et 21h). La règle retenue couvre 45,5 % de la demande de semaine pour 5 757 549 $ (+2,33 %). Le seuil est un choix métier : à 4,9 %, la pointe couvrirait 65,5 % de la demande et n'en serait plus une. La règle est fragile : 21h (5,24 %) est juste au-dessus du seuil (5,21 %), 15h (5,06 %) juste en dessous. Le profil inclut trois jours fériés traités comme des jours de semaine. | Garder l'hypothèse de départ ; seuil de 5,0 % (50,6 % de la demande) ou de 4,9 % (65,5 %) |
 | 32 | 12 | Tests à deux chemins de calcul : grille contre scénario, somme des règles contre scénario | Deux méthodes différentes qui retombent sur le même chiffre valent plus qu'un seul calcul. Si une macro est modifiée d'un côté seulement, un test échoue. | Un seul chemin de calcul vérifié à la main |
+| 33 | 13 | Expérience de type switchback sur toute la ville (unité = jour de semaine × bloc de pointe), pas un A/B par chauffeur | Les chauffeurs d'une même zone se partagent les commandes : un bonus donné à la moitié d'entre eux leur ferait prendre des commandes des autres (interférence) et surestimerait l'effet d'un bonus généralisé. Alterner dans le temps sur toute la ville évite ce partage. Le prix est de n'avoir que 78 unités, donc peu de puissance. | A/B par chauffeur (interférence) ; switchback par zone (plus d'unités, mais les chauffeurs passent d'une zone à l'autre) |
+| 34 | 13 | Effet du bonus simulé, ligne de base réelle | Aucune donnée ne contient de bonus. En injectant un effet connu dans des mesures réelles, on peut vérifier que l'analyse retrouve la vérité. L'expérience valide une méthode, elle ne mesure pas un effet réel, et le README le dit. | Inventer toutes les données ; attendre des données réelles de bonus |
+| 35 | 13 | Répartition stratifiée (bloc × jour de la semaine, 10 strates) par empreinte déterministe d'une graine figée | Le matin (environ 24 000 courses) et le soir (environ 69 000) n'ont pas le même volume : un tirage complet pourrait déséquilibrer les blocs. L'empreinte rend la répartition reproductible et indépendante des résultats. La graine n'est jamais changée après avoir vu un résultat. | Tirage complet ; répartition à la main ; nouveau tirage jusqu'à obtenir un équilibre agréable |
+| 36 | 13 | Exclusion de trois jours fériés (1er janvier, 19 janvier, 16 février) | La demande y est différente : estimation indirecte de 60 % d'un jour ordinaire le matin et 83 % le soir. Les laisser aurait ajouté du bruit. Décision prise à la construction des unités. | Les garder dans l'expérience |
+| 37 | 13 | Test A/A avant d'injecter un effet | Vérifier que la méthode ne trouve rien quand il n'y a rien (faux positifs de 4,5 à 4,6 %, pas de biais) et mesurer le bruit (écart-type de l'effet de 5,25 points). Il a aussi montré qu'une répartition stratifiée analysée par une différence simple est aveugle (0 % de faux positifs). | Injecter directement un effet |
+| 38 | 13 | Plan d'analyse écrit avant l'analyse (`docs/experiment_design.md`), chaque ajout daté dans l'historique | Éviter d'adapter le plan au résultat. | Rédiger le plan après les résultats |
+| 39 | 13 | Analyse par régression sur la strate et la neige, pas par différence simple | Elle est calibrée (4,6 % de faux positifs) et la plus précise : variance divisée par environ 7 par rapport à une répartition complète analysée par une différence simple. | Différence simple (trop prudente après stratification, très bruyante sans) |
+| 40 | 13 | Analyse principale sur les 78 unités, analyse de sensibilité sans les jours perturbés (déclarée exploratoire) | Les jours perturbés ont été repérés en regardant les volumes de base : retirer ce qui arrange serait une analyse biaisée. L'analyse officielle reste complète, la sensibilité montre ce que ces jours coûtent. Jours entiers (6 unités) : 23 février (14,8 cm de neige sur 18 heures), 26 janvier (lendemain du 25 janvier, 18,9 cm sur 17 heures), 2 janvier (lendemain du jour férié). | Retirer ces jours de l'analyse officielle ; ne pas en parler |
+| 41 | 14 | Effet injecté de façon multiplicative (ajouté au logarithme du nombre de courses) à 0 %, +5 %, +15 % et +25 % | Un effet constant en pourcentage s'applique de la même façon à un matin (environ 24 000 courses) et à un soir (environ 69 000). Le cas à 0 % sert de placebo sur la répartition réelle. | Effet additif en nombre de courses (disproportionné entre les blocs) |
+| 42 | 14 | Puissance par répartitions aléatoires répétées (5 000 tirages), le bruit étant calculé une seule fois par tirage | Ajouter un effet constant au logarithme des unités test décale l'estimation de cette valeur sans changer son bruit : le calcul est exact et vérifié dans le script. La simulation concorde avec la théorie (puissance de 16 % à +5 %, 73 % à +15 %). | Une régression par effet et par tirage (environ 13 fois plus lent) ; une formule approchée |
+| 43 | 14 | Jours perturbés déclarés dans un seed (`exp_disturbed_dates`) et marqués dans le modèle d'assignation | La liste est versionnée et testée (6 unités attendues). La répartition ne change pas. | Constante écrite dans le script Python |
+| 44 | 14 | Analyse principale conservée sur les 78 unités malgré son résultat trompeur dans ce tirage | Sur la répartition réelle, le placebo donne +10,0 % (p = 0,069) et un vrai +5 % est estimé à +15,5 % (p = 0,007), alors que l'analyse de sensibilité donne +1,6 % et +6,7 %. Changer d'analyse principale après avoir vu ces résultats reviendrait à choisir celle qui arrange. On garde le plan, on documente l'écart, et on fixera à l'avance une règle d'exclusion par la météo et le calendrier pour une prochaine expérience. | Passer l'analyse de sensibilité en analyse principale après coup |
 
 ## Règles de travail
 
@@ -48,16 +60,13 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 - Toute table finale est réconciliée avec sa source par un test dbt.
 - Les règles de bonus du simulateur sont des hypothèses et leur coût est statique.
 - Après toute modification d'un seed de règles : `dbt seed` puis `dbt build` ciblé, et les tests doivent rester verts.
+- Une expérience : plan écrit avant l'analyse, graine figée, analyse principale non modifiée après avoir vu les résultats.
+- Un résultat significatif issu d'une expérience peu puissante surestime en général l'effet : il se présente
+  toujours avec son intervalle de confiance et la puissance.
+- Les effets simulés valident une méthode : ils ne se présentent jamais comme des résultats réels.
 
 ## Décisions ouvertes
 
-- Niveau de l'A/B : par rider, ou par zone et créneau horaire (à trancher au jour 13).
+- Seuil de rentabilité du bonus de pointe et règle de décision (jour 15).
+- Règle d'exclusion fondée sur la météo et le calendrier, à fixer avant une prochaine expérience.
 - Plafond de coût par requête pour l'assistant IA.
-
-| 33 | 13 | Expérience de type switchback (unité = jour de semaine x bloc de pointe), pas un A/B par chauffeur | | |
-| 34 | 13 | Effet du bonus simulé, ligne de base réelle | | |
-| 35 | 13 | Répartition stratifiée (bloc x jour de la semaine), par empreinte déterministe avec graine figée | | |
-| 36 | 13 | Exclusion de trois jours fériés | | |
-| 37 | 13 | Test A/A avant d'injecter un effet | | |
-| 38 | 13 | Plan d'analyse écrit avant l'analyse | | |
-| 40 | 13 | Analyse principale sur les 78 unités, analyse de sensibilité sans les jours perturbés (déclarée exploratoire) | | |

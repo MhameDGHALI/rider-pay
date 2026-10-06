@@ -75,3 +75,7 @@ seeds:
       +column_types:
         excluded_date: date
         reason: string
+    exp_disturbed_dates:
+      +column_types:
+        disturbed_date: date
+        reason: string

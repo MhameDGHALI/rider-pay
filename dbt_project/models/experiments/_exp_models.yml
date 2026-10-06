@@ -31,7 +31,7 @@ models:
       Répartition au hasard des unités entre test (treatment) et contrôle (control). Aléatoire stratifiée par bloc
       et jour de la semaine, fondée sur une fonction de hachage de l'identifiant d'unité et d'une graine
       (variable exp_seed) : reproductible, indépendante des résultats. Ne jamais changer la graine après avoir
-      vu des résultats.
+      vu des résultats. is_disturbed_day marque les unités retirées de l'analyse de sensibilité (exploratoire).
     columns:
       - name: unit_id
         description: "Identifiant de l'unité, clé de la table."
@@ -44,3 +44,7 @@ models:
           - not_null
           - accepted_values:
               values: ['treatment', 'control']
+      - name: is_disturbed_day
+        description: "Vrai si l'unité tombe un jour du seed exp_disturbed_dates (analyse de sensibilité)."
+        data_tests:
+          - not_null

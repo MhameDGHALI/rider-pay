@@ -9,3 +9,14 @@ seeds:
         data_tests:
           - unique
           - not_null
+
+  - name: exp_disturbed_dates
+    description: >
+      Jours perturbés retirés de l'analyse de sensibilité (exploratoire). Repérés en regardant les volumes de base
+      avant toute injection d'effet : l'analyse principale garde toutes les unités.
+    columns:
+      - name: disturbed_date
+        description: "Date perturbée."
+        data_tests:
+          - unique
+          - not_null
