@@ -91,6 +91,14 @@ def main() -> None:
     assert not row.empty and (row["severity"] == "information").all()
     print("  information : un jour de tempête connu n'est pas une alerte")
 
+    # 5. Un problème de qualité des données reste une alerte, même un jour de tempête
+    quality = inject(base, dt.date(2026, 2, 23), "HV0003", "share_flagged", add=0.20)
+    quality.loc[quality["pickup_date"] == dt.date(2026, 2, 23), "is_expected_disruption"] = True
+    alerts = detect(quality)
+    row = alerts[(alerts["pickup_date"] == dt.date(2026, 2, 23)) & (alerts["metric"] == "share_flagged")]
+    assert not row.empty and (row["severity"] == "alerte").all()
+    print("  alerte      une part de courses signalées anormale un jour de tempête reste une alerte")
+    
     print("OK")
 
 

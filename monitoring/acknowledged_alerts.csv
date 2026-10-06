@@ -1,0 +1,4 @@
+pickup_date,license_num,metric,reason
+2026-01-22,HV0005,share_flagged,tarif de base nul sur 9.5 pct des courses Lyft toute la journee
+2026-01-23,HV0005,share_flagged,cause non etablie
+2026-01-25,HV0003,share_flagged,; exclues des analyses par is_clean_trip

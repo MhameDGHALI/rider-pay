@@ -76,8 +76,11 @@ Le détail et les alternatives écartées sont dans [docs/decisions.md](docs/dec
 ## Qualité des données
 
 Chaque passage d'une couche à l'autre est contrôlé par un test de réconciliation, plus un test de bout en bout
-de la source brute aux agrégats. 35 087 courses (0,29 %) sont signalées comme anormales, et 1,82 % ont une
-chronologie incohérente. Détail dans [docs/data_quality.md](docs/data_quality.md).
+de la source brute aux agrégats. 
+35 087 courses (0,29 %) sont signalées comme anormales, dont 83 % se concentrent sur trois journées d'incident (25 janvier
+chez Uber, 22 et 23 janvier chez Lyft) ; hors de ces journées, 0,05 %. 1,82 % des courses ont une chronologie incohérente.
+Un détecteur d'anomalies retrouve ces trois incidents sans fausse alerte sur la période.
+. Détail dans [docs/data_quality.md](docs/data_quality.md).
 
 ## Coût des requêtes
 
@@ -94,6 +97,14 @@ n'existe) : l'expérience valide une méthode, elle ne mesure pas un effet réel
 - Effet minimal détectable : 16,5 % avec les 78 unités, 5,7 % hors six unités perturbées (tempêtes, jours fériés).
 - Seuil de rentabilité : 31.6 % de courses en plus (marge approximative). Règle de décision à trois issues.
 - Un résultat significatif issu d'un tirage peu puissant surestime l'effet : un vrai +5 % est estimé à +15,5 % sur la répartition réelle.
+
+## Surveillance de la qualité des données
+
+Un modèle dbt calcule 6 indicateurs quotidiens par opérateur ; un détecteur à score robuste (médiane et écart absolu médian)
+signale les anomalies. Les événements attendus (jours fériés, forte neige) expliquent la demande mais pas la qualité des
+données. Les alertes examinées sont acquittées dans un journal versionné. Le détecteur est validé sur des séries simulées
+avec des anomalies injectées, et sa sensibilité est mesurée sur les vraies données. Détail dans
+[docs/monitoring.md](docs/monitoring.md).
 
 ## Limites
 

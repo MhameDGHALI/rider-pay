@@ -37,6 +37,11 @@ Aucune ligne n'est supprimée : les anomalies sont signalées par des indicateur
 Les six premières catégories se recoupent fortement : l'union (35 087) dépasse de seulement 3 543 courses
 la plus grande catégorie (31 544).
 
+**Les courses signalées se concentrent sur trois journées d'incident** : le 25 janvier chez Uber (17 072 courses, 48,7 %),
+et les 22 et 23 janvier chez Lyft (5 241 et 6 905 courses, 14,9 % et 19,7 %), soit 83,3 % des 35 087 courses signalées sur
+1,6 % des courses. Hors de ces journées, 0,05 % des courses sont signalées. Les deux incidents ont des profils différents :
+tarif de base nul avec rémunération présente (Lyft, à partir de 19h le 22 janvier), tarif et rémunération nuls (Uber).
+
 ### Chronologie incohérente
 - Pour 164 284 courses (1,34 %), l'heure de la demande est postérieure à la prise en charge.
 - L'heure d'arrivée du chauffeur est postérieure à la prise en charge pour 397 courses seulement (0,003 %).

@@ -8,22 +8,25 @@ Principe, pour chaque indicateur et chaque opérateur :
    être comparable à un écart-type), avec un plancher : en dessous, un écart est jugé sans importance.
 4. SCORE (z-score robuste) = écart / échelle. Une anomalie est un score de valeur absolue supérieure au seuil.
 
-Une alerte est levée si le jour n'est pas un événement attendu (jour férié, forte neige, lendemain de l'un ou de
-l'autre). Les anomalies d'événements attendus sont signalées à titre d'INFORMATION, pour ne pas noyer les vraies alertes.
+Un événement attendu (jour férié, forte neige, lendemain de l'un ou de l'autre) explique une variation de la DEMANDE
+(volume, rémunération, marge, frais de congestion) : ces anomalies sont alors signalées à titre d'INFORMATION, pour ne
+pas noyer les vraies alertes. Il n'explique PAS un problème de qualité des données (part de courses signalées,
+chronologies incohérentes) : celles-ci restent des alertes, même un jour de tempête.
 """
 import numpy as np
 import pandas as pd
 
 THRESHOLD = 4.0   # seuil du score ; calibré sur des séries simulées (environ 3 fausses alertes pour 100 mois de données)
 
-# Indicateurs surveillés : passage au logarithme, plancher d'échelle (plus petit écart significatif), sens surveillé
+# Indicateurs surveillés : passage au logarithme, plancher d'échelle (plus petit écart significatif), sens surveillé,
+# et "muted" : vrai si un événement attendu (tempête, jour férié) peut expliquer l'anomalie (indicateur de demande)
 METRICS = {
-    "nb_trips":                 {"log": True,  "min_scale": 0.05,  "direction": "both", "label": "nombre de courses"},
-    "avg_clean_driver_pay_usd": {"log": True,  "min_scale": 0.02,  "direction": "both", "label": "rémunération moyenne par course"},
-    "platform_margin_rate":     {"log": False, "min_scale": 0.01,  "direction": "both", "label": "marge de la plateforme"},
-    "share_flagged":            {"log": False, "min_scale": 0.001, "direction": "up",   "label": "part de courses signalées"},
-    "share_timeline_anomaly":   {"log": False, "min_scale": 0.003, "direction": "up",   "label": "part de chronologies incohérentes"},
-    "share_cbd_fee":            {"log": False, "min_scale": 0.01,  "direction": "both", "label": "part de courses avec frais de congestion"},
+    "nb_trips":                 {"log": True,  "min_scale": 0.05,  "direction": "both", "muted": True,  "label": "nombre de courses"},
+    "avg_clean_driver_pay_usd": {"log": True,  "min_scale": 0.02,  "direction": "both", "muted": True,  "label": "rémunération moyenne par course"},
+    "platform_margin_rate":     {"log": False, "min_scale": 0.01,  "direction": "both", "muted": True,  "label": "marge de la plateforme"},
+    "share_flagged":            {"log": False, "min_scale": 0.001, "direction": "up",   "muted": False, "label": "part de courses signalées"},
+    "share_timeline_anomaly":   {"log": False, "min_scale": 0.003, "direction": "up",   "muted": False, "label": "part de chronologies incohérentes"},
+    "share_cbd_fee":            {"log": False, "min_scale": 0.01,  "direction": "both", "muted": True,  "label": "part de courses avec frais de congestion"},
 }
 
 
@@ -71,11 +74,12 @@ def detect(df: pd.DataFrame, threshold: float = THRESHOLD) -> pd.DataFrame:
         part["value"] = scores.loc[flagged, "value"]
         part["normal"] = np.exp(scores.loc[flagged, "normal"]) if spec["log"] else scores.loc[flagged, "normal"]
         part["z"] = scores.loc[flagged, "z"]
+        part["muted"] = spec["muted"]
         parts.append(part)
     out = pd.concat(parts, ignore_index=True)
     if out.empty:
         return out
-    out["severity"] = np.where(out["is_expected_disruption"], "information", "alerte")
+    out["severity"] = np.where(out["is_expected_disruption"] & out["muted"], "information", "alerte")
     return out.sort_values(["severity", "pickup_date", "license_num", "metric"]).reset_index(drop=True)
 
 
