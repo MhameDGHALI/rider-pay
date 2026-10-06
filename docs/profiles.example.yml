@@ -1,0 +1,12 @@
+rider_pay:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: VOTRE_PROJECT_ID
+      dataset: dbt_dev
+      location: US
+      threads: 4
+      job_execution_timeout_seconds: 300
+      priority: interactive
