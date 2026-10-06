@@ -53,3 +53,11 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 
 - Niveau de l'A/B : par rider, ou par zone et créneau horaire (à trancher au jour 13).
 - Plafond de coût par requête pour l'assistant IA.
+
+| 33 | 13 | Expérience de type switchback (unité = jour de semaine x bloc de pointe), pas un A/B par chauffeur | | |
+| 34 | 13 | Effet du bonus simulé, ligne de base réelle | | |
+| 35 | 13 | Répartition stratifiée (bloc x jour de la semaine), par empreinte déterministe avec graine figée | | |
+| 36 | 13 | Exclusion de trois jours fériés | | |
+| 37 | 13 | Test A/A avant d'injecter un effet | | |
+| 38 | 13 | Plan d'analyse écrit avant l'analyse | | |
+| 40 | 13 | Analyse principale sur les 78 unités, analyse de sensibilité sans les jours perturbés (déclarée exploratoire) | | |

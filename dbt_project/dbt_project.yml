@@ -17,6 +17,7 @@ vars:
   end_date: "2026-02-28"
   congestion_zone_threshold: 0.95
   congestion_zone_min_trips: 100
+  exp_seed: "switchback_v1"
 
 models:
   rider_pay:
@@ -32,6 +33,9 @@ models:
     simulation:
       +materialized: table
       +schema: simulation
+    experiments:
+      +materialized: table
+      +schema: experiments
 
 seeds:
   rider_pay:
@@ -67,3 +71,7 @@ seeds:
       +column_types:
         scenario_id: string
         rule_id: string
+    exp_excluded_dates:
+      +column_types:
+        excluded_date: date
+        reason: string

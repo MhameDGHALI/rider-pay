@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: exp_switchback_units
+    description: >
+      Unités de l'expérience switchback « bonus de pointe en semaine ». Une unité = un jour de semaine
+      (hors jours fériés) x un bloc de pointe (matin ou soir). Les blocs d'heures sont lus dans les règles
+      R_PEAK_AM et R_PEAK_PM du simulateur. Les mesures sont réelles (courses propres) : aucun effet n'est injecté ici.
+    columns:
+      - name: unit_id
+        description: "Identifiant de l'unité : date et bloc, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: block
+        description: "AM (matin) ou PM (soir)."
+        data_tests:
+          - accepted_values:
+              values: ['AM', 'PM']
+      - name: stratum
+        description: "Strate de répartition : bloc et jour de la semaine (1 = dimanche, 2 = lundi, ..., 7 = samedi)."
+      - name: nb_trips
+        description: "Nombre de courses propres de l'unité (mesure de base, réelle)."
+        data_tests:
+          - not_null
+      - name: snow_hours
+        description: "Nombre d'heures de neige dans le bloc ce jour-là (covariable connue avant l'expérience)."
+
+  - name: exp_switchback_assignment
+    description: >
+      Répartition au hasard des unités entre test (treatment) et contrôle (control). Aléatoire stratifiée par bloc
+      et jour de la semaine, fondée sur une fonction de hachage de l'identifiant d'unité et d'une graine
+      (variable exp_seed) : reproductible, indépendante des résultats. Ne jamais changer la graine après avoir
+      vu des résultats.
+    columns:
+      - name: unit_id
+        description: "Identifiant de l'unité, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: arm
+        description: "treatment (bonus actif pendant le bloc) ou control (pas de bonus)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['treatment', 'control']

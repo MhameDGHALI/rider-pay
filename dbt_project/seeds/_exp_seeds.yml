@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: exp_excluded_dates
+    description: "Jours exclus de l'expérience (jours fériés, dont le comportement de la demande diffère)."
+    columns:
+      - name: excluded_date
+        description: "Date exclue."
+        data_tests:
+          - unique
+          - not_null
