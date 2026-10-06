@@ -17,18 +17,37 @@ models:
         description: "Date de prise en charge au format entier AAAAMMJJ (ex. 20260125). Colonne de partitionnement. Clé vers dim_date."
         data_tests:
           - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: pickup_hour_start_at
+        description: "Heure de prise en charge arrondie à l'heure pleine. Clé vers dim_weather_hour."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_weather_hour')
+              field: observed_at
       - name: license_num
         description: "Code opérateur TLC (HV0003 = Uber, HV0005 = Lyft). Clé vers dim_operator."
         data_tests:
           - not_null
+          - relationships:
+              to: ref('dim_operator')
+              field: license_num
       - name: pickup_location_id
         description: "Zone de prise en charge. Clé vers dim_zone."
         data_tests:
           - not_null
+          - relationships:
+              to: ref('dim_zone')
+              field: location_id
       - name: dropoff_location_id
         description: "Zone de dépose. Clé vers dim_zone."
         data_tests:
           - not_null
+          - relationships:
+              to: ref('dim_zone')
+              field: location_id
       - name: driver_pay_usd
         description: "Rémunération du chauffeur, hors péages et pourboires (dictionnaire TLC)."
       - name: is_clean_trip

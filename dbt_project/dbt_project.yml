@@ -12,6 +12,12 @@ snapshot-paths: ["snapshots"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
+vars:
+  start_date: "2026-01-01"
+  end_date: "2026-02-28"
+  congestion_zone_threshold: 0.95
+  congestion_zone_min_trips: 100
+
 models:
   rider_pay:
     staging:
@@ -32,3 +38,7 @@ seeds:
         Borough: string
         Zone: string
         service_zone: string
+    operators:
+      +column_types:
+        license_num: string
+        operator_name: string

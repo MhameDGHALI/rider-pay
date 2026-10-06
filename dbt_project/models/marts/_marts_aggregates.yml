@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: agg_daily_operator
+    description: >
+      Agrégat journalier par opérateur. Les colonnes clean_* portent sur les courses propres
+      (is_clean_trip). Les sommes sont additives ; les ratios ne le sont pas : en BI, les recalculer
+      à partir des sommes.
+    columns:
+      - name: agg_key
+        description: "Clé du grain : date_key et opérateur."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: agg_zone_hour
+    description: >
+      Agrégat par zone de départ, heure de la journée et type de jour (semaine ou week-end),
+      pour des cartes de chaleur. Les cellules à faible effectif sont bruitées : filtrer sur nb_clean_trips.
+    columns:
+      - name: agg_key
+        description: "Clé du grain : zone, heure, type de jour."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: agg_zone_congestion
+    description: >
+      Part des courses avec frais de congestion (cbd_congestion_fee > 0) par zone de départ.
+      is_high_fee_zone est une règle EMPIRIQUE (seuil et effectif minimal en variables dbt), pas la
+      définition officielle de la zone de réduction de la congestion.
+    columns:
+      - name: pickup_location_id
+        description: "Zone de départ, clé de la table."
+        data_tests:
+          - unique
+          - not_null

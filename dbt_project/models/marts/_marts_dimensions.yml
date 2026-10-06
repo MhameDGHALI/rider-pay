@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: dim_zone
+    description: "Dimension des zones TLC (265 zones). Une ligne par zone, utilisée pour le départ et pour l'arrivée."
+    columns:
+      - name: location_id
+        description: "Identifiant de zone, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: borough
+        description: "Quartier ('Unknown' pour les zones 264 et 265)."
+        data_tests:
+          - not_null
+      - name: zone_label
+        description: "Nom de la zone suivi de son identifiant, unique. À préférer à zone_name dans les visuels : le nom seul n'est pas unique."
+        data_tests:
+          - unique
+      - name: is_manhattan
+        description: "Vrai si le quartier est Manhattan."
+      - name: is_airport_zone
+        description: "Vrai si la zone de service est Airports ou EWR."
+
+  - name: dim_date
+    description: "Dimension calendrier : une ligne par jour entre start_date et end_date (variables dbt)."
+    columns:
+      - name: date_key
+        description: "Date au format entier AAAAMMJJ, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Date (DATE)."
+        data_tests:
+          - unique
+          - not_null
+      - name: day_of_week
+        description: "1 = dimanche, 7 = samedi (convention BigQuery)."
+      - name: week_start_date
+        description: "Lundi de la semaine."
+
+  - name: dim_operator
+    description: "Dimension des opérateurs HVFHS, d'après le dictionnaire TLC (seed operators)."
+    columns:
+      - name: license_num
+        description: "Code de licence TLC, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: operator_name
+        description: "Nom de l'opérateur (HV0002 Juno, HV0003 Uber, HV0004 Via, HV0005 Lyft). Seuls Uber et Lyft apparaissent dans l'échantillon."
+        data_tests:
+          - not_null
+
+  - name: dim_weather_hour
+    description: "Dimension météo : une ligne par heure locale de New York (station unique pour toute la ville)."
+    columns:
+      - name: observed_at
+        description: "Heure locale (DATETIME), clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: weather_condition
+        description: "snow (neige seule), rain (pluie seule), mixed (neige et pluie), dry (ni l'une ni l'autre). Seuils : snowfall_cm > 0 et rain_mm > 0."
+        data_tests:
+          - accepted_values:
+              values: ['snow', 'rain', 'mixed', 'dry']
