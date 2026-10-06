@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: int_trips_enriched
+    description: >
+      Une ligne par course. Ajoute à int_trip_economics les quartiers et zones de départ et
+      d'arrivée, la météo horaire de l'heure de prise en charge et un indicateur de course
+      aéroport. Les jointures sont des LEFT JOIN : aucune course n'est perdue ni dupliquée.
+    columns:
+      - name: trip_id
+        description: "Identifiant de la course, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: pickup_borough
+        description: "Quartier de prise en charge ('Unknown' pour les zones 264 et 265)."
+        data_tests:
+          - not_null
+      - name: dropoff_borough
+        description: "Quartier de dépose ('Unknown' pour les zones 264 et 265)."
+        data_tests:
+          - not_null
+      - name: pickup_zone_name
+        description: "Nom de la zone de prise en charge. Le nom n'est pas unique : utiliser pickup_location_id comme clé."
+      - name: cbd_congestion_fee_usd
+        description: "Frais de la zone de réduction de la congestion (MTA), valeurs observées : 0, 1,5 ou 3 dollars. Dans l'échantillon, 31,5 % des courses le paient : 99,0 % de ces courses ont un départ ou une arrivée à Manhattan, et les départs de 38 zones du sud de Manhattan le paient dans plus de 96 % des cas."
+        data_tests:
+          - accepted_values:
+              values: [0, 1.5, 3.0]
+              quote: false
+              config:
+                severity: warn
+      - name: temperature_c
+        description: "Température de l'heure de prise en charge (station unique pour toute la ville)."
+      - name: snowfall_cm
+        description: "Neige tombée pendant l'heure de prise en charge, en cm."
+      - name: is_snowing
+        description: "Vrai si snowfall_cm est strictement positif pendant l'heure de prise en charge."
+      - name: is_raining
+        description: "Vrai si rain_mm est strictement positif pendant l'heure de prise en charge."
+      - name: has_weather
+        description: "Vrai si une ligne de météo a été trouvée pour l'heure de prise en charge. Doit être vrai pour toutes les courses."
+      - name: is_airport_trip
+        description: "Vrai si la zone de départ ou d'arrivée est de type Airports ou EWR (service_zone). Se recoupe à 99,8 % avec airport_fee_usd > 0 (22 598 désaccords sur 12 244 353 courses). Pour un montant, utiliser airport_fee_usd."
