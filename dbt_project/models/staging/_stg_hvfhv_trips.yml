@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: stg_hvfhv_trips
+    description: >
+      Courses HVFHS (Uber, Lyft), échantillon de 30 % de janvier-février 2026.
+      Renommage, typage et conversion TIMESTAMP vers DATETIME (heure locale de New York).
+      Aucune ligne supprimée, aucune règle métier.
+    columns:
+      - name: trip_id
+        description: "Identifiant fabriqué par le script d'échantillonnage : mois + numéro de ligne dans le fichier TLC d'origine."
+        data_tests:
+          - unique
+          - not_null
+      - name: license_num
+        description: "Code opérateur TLC (HV0003 = Uber, HV0005 = Lyft)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['HV0003', 'HV0005']
+      - name: request_at
+        description: "Heure de la demande du client (heure locale New York)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: on_scene_at
+        description: "Heure d'arrivée du chauffeur sur place (heure locale). Aucune valeur vide observée dans l'échantillon."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: pickup_at
+        description: "Heure de prise en charge du client (heure locale)."
+        data_tests:
+          - not_null
+      - name: dropoff_at
+        description: "Heure de dépose du client (heure locale)."
+        data_tests:
+          - not_null
+      - name: pickup_location_id
+        description: "Zone TLC de prise en charge."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_taxi_zones')
+              field: location_id
+              config:
+                severity: warn
+      - name: dropoff_location_id
+        description: "Zone TLC de dépose."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_taxi_zones')
+              field: location_id
+              config:
+                severity: warn
+      - name: trip_miles
+        description: "Distance du trajet en miles."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: trip_seconds
+        description: "Durée du trajet en secondes (colonne trip_time de la TLC)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: base_passenger_fare_usd
+        description: "Tarif de base payé par le client, en dollars (hors taxes, péages, pourboire)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: driver_pay_usd
+        description: "Rémunération totale du chauffeur pour la course, en dollars."
+        data_tests:
+          - not_null
+      - name: is_shared_request
+        description: "Le client a demandé une course partagée."
+      - name: is_shared_match
+        description: "La course a été effectivement partagée."
+      - name: is_wav_request
+        description: "Le client a demandé un véhicule accessible aux fauteuils roulants."
+      - name: is_wav_match
+        description: "La course a été effectuée dans un véhicule accessible aux fauteuils roulants, demandé ou non (à confirmer dans le dictionnaire TLC)."
