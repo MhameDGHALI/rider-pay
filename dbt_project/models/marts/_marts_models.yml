@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: fct_trips
+    description: >
+      Table de faits : une ligne par course (12 244 353 lignes dans l'échantillon de 30 %).
+      Partitionnée par plage d'entiers sur pickup_date_key (AAAAMMJJ) et clusterisée par opérateur et
+      zone de départ. Les attributs des zones (quartier, nom) et de la météo (température, neige)
+      sont dans les dimensions, jointes par pickup_location_id, dropoff_location_id et pickup_hour_start_at.
+    columns:
+      - name: trip_id
+        description: "Identifiant de la course, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: pickup_date_key
+        description: "Date de prise en charge au format entier AAAAMMJJ (ex. 20260125). Colonne de partitionnement. Clé vers dim_date."
+        data_tests:
+          - not_null
+      - name: license_num
+        description: "Code opérateur TLC (HV0003 = Uber, HV0005 = Lyft). Clé vers dim_operator."
+        data_tests:
+          - not_null
+      - name: pickup_location_id
+        description: "Zone de prise en charge. Clé vers dim_zone."
+        data_tests:
+          - not_null
+      - name: dropoff_location_id
+        description: "Zone de dépose. Clé vers dim_zone."
+        data_tests:
+          - not_null
+      - name: driver_pay_usd
+        description: "Rémunération du chauffeur, hors péages et pourboires (dictionnaire TLC)."
+      - name: is_clean_trip
+        description: "Vrai si montants, distance et durée sont cohérents. Filtre obligatoire pour toute analyse de rémunération. Ne couvre pas la chronologie (voir has_timeline_anomaly)."
+        data_tests:
+          - not_null
