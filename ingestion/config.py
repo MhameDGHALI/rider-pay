@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 # --- Google Cloud -----------------------------------------------------------
-PROJECT_ID = os.getenv("GCP_PROJECT_ID", "YOUR_PROJECT_ID")  # <-- à remplacer au jour 2
+PROJECT_ID = os.getenv("GCP_PROJECT_ID", "rider-pay-platform")  # <-- à remplacer au jour 2
 LOCATION = "US"          # région du dataset BigQuery (doit rester la même partout)
 RAW_DATASET = "raw"      # dataset qui contient les données brutes
 
