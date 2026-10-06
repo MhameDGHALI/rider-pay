@@ -34,3 +34,5 @@ course d'une marketplace de livraison, et valider ces changements par expérimen
 - [ ] Règles de bonus à simuler (neige, heure de pointe, zone)
 - [ ] Niveau de l'A/B : par rider ou par zone et créneau
 - [ ] Plafond de coût par requête pour l'assistant IA
+
+règles de bonus à simuler et niveau de l'A/B (par rider ou par zone et créneau)

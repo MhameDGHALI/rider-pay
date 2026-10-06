@@ -35,3 +35,27 @@ models:
         data_tests:
           - unique
           - not_null
+
+  - name: sim_scenario_rule_bonus
+    description: >
+      Coût de chaque règle dans chaque scénario. Une ligne par couple scénario - règle.
+      share_of_scenario_bonus donne la part de chaque règle dans le coût du scénario.
+      bonus_per_matched_trip_usd mesure l'intensité de la règle, nb_trips_matched son étendue.
+    columns:
+      - name: scenario_rule_key
+        description: "Clé du grain : scénario et règle."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: sim_snow_sensitivity
+    description: >
+      Analyse de sensibilité : coût du bonus neige pour une série de taux (0 à 30 %, par pas de 5 points).
+      Réutilise les macros du moteur de règles en remplaçant le taux de la règle R_SNOW_15.
+      Le coût est linéaire en fonction du taux, car le bonus est un pourcentage de la rémunération réelle.
+    columns:
+      - name: rate_pct
+        description: "Taux du bonus neige, en points de pourcentage (15 = 15 %)."
+        data_tests:
+          - unique
+          - not_null

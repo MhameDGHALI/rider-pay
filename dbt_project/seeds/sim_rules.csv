@@ -1,6 +1,6 @@
 rule_id,rule_label,snow_condition,day_type,hour_from,hour_to,zone_condition,airport_condition,operator,bonus_type,bonus_value
 R_SNOW_15,Snow bonus 15 pct of pay,snow,any,0,23,any,any,any,pct_of_pay,0.15
 R_SNOW_165,Snow bonus 16.5 pct of pay,snow,any,0,23,any,any,any,pct_of_pay,0.165
-R_PEAK_AM,Weekday morning peak 7h to 9h59 flat 1.50,any,weekday,7,9,any,any,any,flat_per_trip,1.5
-R_PEAK_PM,Weekday evening peak 16h to 19h59 flat 1.50,any,weekday,16,19,any,any,any,flat_per_trip,1.5
+R_PEAK_AM,Weekday morning peak 8h to 9h59 flat 1.50,any,weekday,8,9,any,any,any,flat_per_trip,1.5
+R_PEAK_PM,Weekday evening peak 16h to 21h59 flat 1.50,any,weekday,16,21,any,any,any,flat_per_trip,1.5
 R_ZONE_100,High fee zone flat 1.00,any,any,0,23,high_fee_zone,any,any,flat_per_trip,1.0

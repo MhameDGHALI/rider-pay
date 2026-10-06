@@ -136,7 +136,6 @@ de conception, les contrôles et les interprétations sont documentés dans `doc
 
 ## Prochaines étapes
 
-- Simulateur d'incitations : règles de bonus pilotées par des seeds dbt, comparaison de scénarios.
-- Analyse A/B : contrôle du déséquilibre d'affectation, test statistique, puissance.
-- Intégration continue (GitHub Actions) et alerte sur dérive du coût par course.
-- Dashboard Power BI et assistant IA (text-to-SQL avec garde-fous et évaluation).
+> **Statut : projet en cours.** Les couches de données, leurs tests, le mesure de coût des requêtes et le
+> simulateur d'incitations sont terminés. L'analyse A/B, l'intégration continue, le dashboard Power BI et
+> l'assistant IA sont à venir (voir « Prochaines étapes »).
