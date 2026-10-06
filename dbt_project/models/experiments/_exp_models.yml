@@ -48,3 +48,21 @@ models:
         description: "Vrai si l'unité tombe un jour du seed exp_disturbed_dates (analyse de sensibilité)."
         data_tests:
           - not_null
+
+  - name: exp_break_even
+    description: >
+      Seuil de rentabilité du bonus de pointe, par bloc. Population identique à celle des unités de l'expérience.
+      La marge (tarif de base moins rémunération) est approximative. break_even_lift est la hausse minimale du nombre de
+      courses pour que le bonus rapporte plus qu'il ne coûte : bonus / (marge - bonus). Vide si la marge ne dépasse pas le bonus.
+    columns:
+      - name: block
+        description: "AM (matin) ou PM (soir), clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: avg_margin_usd
+        description: "Marge moyenne par course (approximative), en dollars."
+        data_tests:
+          - not_null
+      - name: break_even_lift
+        description: "Hausse minimale du nombre de courses pour que le bonus soit rentable (0,34 = 34 %)."

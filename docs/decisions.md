@@ -51,7 +51,10 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 | 42 | 14 | Puissance par répartitions aléatoires répétées (5 000 tirages), le bruit étant calculé une seule fois par tirage | Ajouter un effet constant au logarithme des unités test décale l'estimation de cette valeur sans changer son bruit : le calcul est exact et vérifié dans le script. La simulation concorde avec la théorie (puissance de 16 % à +5 %, 73 % à +15 %). | Une régression par effet et par tirage (environ 13 fois plus lent) ; une formule approchée |
 | 43 | 14 | Jours perturbés déclarés dans un seed (`exp_disturbed_dates`) et marqués dans le modèle d'assignation | La liste est versionnée et testée (6 unités attendues). La répartition ne change pas. | Constante écrite dans le script Python |
 | 44 | 14 | Analyse principale conservée sur les 78 unités malgré son résultat trompeur dans ce tirage | Sur la répartition réelle, le placebo donne +10,0 % (p = 0,069) et un vrai +5 % est estimé à +15,5 % (p = 0,007), alors que l'analyse de sensibilité donne +1,6 % et +6,7 %. Changer d'analyse principale après avoir vu ces résultats reviendrait à choisir celle qui arrange. On garde le plan, on documente l'écart, et on fixera à l'avance une règle d'exclusion par la météo et le calendrier pour une prochaine expérience. | Passer l'analyse de sensibilité en analyse principale après coup |
-
+| 45 | 15 | Seuil de rentabilité fondé sur la marge approximative : le bonus rapporte s'il augmente les courses de plus de c / (m - c), le bonus étant versé sur toutes les courses | Un effet significatif ne dit pas si le bonus rapporte plus qu'il ne coûte. Mesuré : c = 1,50 $, marge de 6,25 $ (5,78 $ le matin, 6,41 $ le soir), seuil de 31,6 % (35,1 % et 30,5 %). À +5 %, chaque course supplémentaire coûte 31,50 $ de bonus pour 6,25 $ de marge. La marge est approximative (le tarif de base exclut taxes et frais), le seuil aussi. | Juger le bonus sur sa seule significativité ; ignorer le bonus versé sur les courses qui auraient eu lieu de toute façon |
+| 46 | 15 | Règle de décision à trois issues (adopter, abandonner, non concluant) fixée avant d'être appliquée, fondée sur l'intervalle de confiance à 95 % | On n'adopte pas sur une estimation isolée : à faible puissance, un résultat significatif surestime l'effet. La troisième issue évite de trancher quand le seuil est dans l'intervalle. Sur la répartition réelle : aucune décision erronée, trois « non concluant » sur huit. | Adopter si p < 0,05 ; décider sur l'estimation seule |
+| 47 | 15 | Probabilité de chaque décision estimée par simulation (5 000 répartitions) | Elle révèle une zone grise : avec 78 unités, la règle tranche de façon fiable si l'effet vrai est sous environ 10 % (abandon dans 92 % des cas) ou au-dessus d'environ 60 % (adoption dans 96,5 % des cas). Hors jours perturbés, la zone grise se réduit à 25-38 %. Les décisions erronées sont rares (0,9 % d'adoptions à tort à +30 %). | Ne regarder que la répartition réelle (un seul tirage) |
+| 48 | 15 | Rapport Markdown plutôt que notebook ; pas de démonstration chiffrée de l'interférence | Même contenu et mêmes figures, affichés directement sur GitHub, sans installation (Jupyter). L'interférence reste argumentée qualitativement (décision 33) : un modèle jouet aux paramètres inventés ajouterait du temps sans résultat réel. | Notebook Jupyter ; modèle jouet de l'interférence |
 ## Règles de travail
 
 - Toute analyse de rémunération ou de coût filtre sur `is_clean_trip`.
@@ -67,6 +70,7 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 
 ## Décisions ouvertes
 
-- Seuil de rentabilité du bonus de pointe et règle de décision (jour 15).
+
 - Règle d'exclusion fondée sur la météo et le calendrier, à fixer avant une prochaine expérience.
+- Analyse séparée du matin et du soir (seuils de rentabilité différents), au prix de moitié moins d'unités.
 - Plafond de coût par requête pour l'assistant IA.

@@ -84,6 +84,17 @@ chronologie incohérente. Détail dans [docs/data_quality.md](docs/data_quality.
 Pour une requête sur une journée, la table de faits partitionnée lit 1,47 Mo contre 373,68 Mo pour la vue source.
 Méthode, décomposition et limites dans [docs/benchmark.md](docs/benchmark.md).
 
+## Expérimentation (switchback)
+
+Un bonus de pointe en semaine est testé par une expérience de type switchback : des plages (jour de semaine x matin ou soir)
+sont réparties au hasard entre test et contrôle sur toute la ville. L'effet du bonus est **simulé** (aucune donnée de bonus
+n'existe) : l'expérience valide une méthode, elle ne mesure pas un effet réel. Détail dans [docs/experiment_report.md](docs/experiment_report.md).
+
+- Répartition stratifiée et reproductible dans dbt, test A/A (faux positifs de 4,6 %), analyse par régression.
+- Effet minimal détectable : 16,5 % avec les 78 unités, 5,7 % hors six unités perturbées (tempêtes, jours fériés).
+- Seuil de rentabilité : 31.6 % de courses en plus (marge approximative). Règle de décision à trois issues.
+- Un résultat significatif issu d'un tirage peu puissant surestime l'effet : un vrai +5 % est estimé à +15,5 % sur la répartition réelle.
+
 ## Limites
 
 - L'échantillon fait environ 30 % des courses : les volumes et totaux ne représentent pas la réalité,
@@ -95,6 +106,7 @@ Méthode, décomposition et limites dans [docs/benchmark.md](docs/benchmark.md).
 - 1,82 % des courses ont une chronologie incohérente (voir le rapport de qualité).
 - Le sandbox BigQuery supprime les tables après 60 jours : le projet se reconstruit en quelques commandes.
 
+L'effet du bonus est simulé : l'expérimentation valide une méthode. La marge utilisée pour la rentabilité est approximative.
 ## Comment reproduire le projet
 
 Versions utilisées : Python 3.13, dbt-core 1.12.5, dbt-bigquery 1.12.1.
@@ -137,5 +149,5 @@ de conception, les contrôles et les interprétations sont documentés dans `doc
 ## Prochaines étapes
 
 > **Statut : projet en cours.** Les couches de données, leurs tests, le mesure de coût des requêtes et le
-> simulateur d'incitations sont terminés. L'analyse A/B, l'intégration continue, le dashboard Power BI et
+> simulateur d'incitations sont terminés.l'intégration continue, le dashboard Power BI et
 > l'assistant IA sont à venir (voir « Prochaines étapes »).

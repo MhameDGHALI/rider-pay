@@ -201,12 +201,29 @@ La simulation concorde avec la théorie calculée à partir du bruit du test A/A
 
 ## Règle de décision
 
-À compléter au jour 15 :
-- le seuil de rentabilité : avec un bonus fixe c par course et une marge moyenne m par course,
-  le bonus rapporte plus qu'il ne coûte si l'augmentation du nombre de courses dépasse c / (m - c).
-  La marge m est approximative (tarif de base moins rémunération du chauffeur) ;
-- la condition sur l'intervalle de confiance, qui tient compte de la faible puissance : une estimation isolée
-  ne suffit pas.
+## Règle de décision
+
+Fixée avant d'être appliquée aux résultats :
+
+- **Seuil de rentabilité** : avec un bonus fixe c par course et une marge moyenne m par course, le bonus rapporte
+  plus qu'il ne coûte si le nombre de courses augmente de plus de c / (m - c). Le bonus est versé sur toutes les
+  courses, y compris les courses supplémentaires. La marge (tarif de base moins rémunération du chauffeur) est
+  approximative. Valeurs mesurées : c = 1,50 $, m = 6,25 $ (5,78 $ le matin, 6,41 $ le soir), seuil de 31,6 %
+  (35,1 % le matin, 30,5 % le soir).
+- **Règle à trois issues**, sur l'intervalle de confiance à 95 % de l'effet : adopter si la borne basse dépasse
+  le seuil ; abandonner si la borne haute est sous le seuil ; sinon non concluant (prolonger l'expérience).
+- Limites : les courses supplémentaires sont supposées rapporter la marge moyenne ; aucun gain de fidélisation ni
+  coût fixe n'est pris en compte ; l'expérience mesure un effet moyen des deux blocs alors que leurs seuils diffèrent.
+
+### Résultats (docs/decision_analysis.md)
+
+- Coût du bonus par course supplémentaire : 31,50 $ à +5 %, 11,50 $ à +15 %, 7,50 $ à +25 %, 6,25 $ à l'équilibre.
+- Sur la répartition réelle, aucune décision erronée. Analyse principale : abandonner à 0 % et +5 %, non concluant à
+  +15 % et +25 %. Sensibilité : abandonner à 0 %, +5 % et +15 %, non concluant à +25 % (borne haute de 32,0 %, soit
+  0,4 point au-dessus du seuil).
+- Probabilités (5 000 répartitions) : l'analyse principale tranche de façon fiable si l'effet vrai est sous environ 10 %
+  (abandon dans 92 % des cas) ou au-dessus d'environ 60 % (adoption dans 96,5 % des cas) ; entre 20 % et 50 %, elle
+  répond « non concluant » dans au moins un tirage sur trois. Hors jours perturbés, la zone grise se réduit à 25-38 %.
 
 ## Ce qui est réel et ce qui est simulé
 
@@ -231,6 +248,10 @@ Les résultats illustrent la méthode. Ils ne disent rien de l'effet d'un bonus 
 - Une seule station météo pour toute la ville.
 - Le nombre de courses réalisées mélange offre et demande.
 - La puissance est calculée en considérant ces 78 unités comme fixes : elle ne vaut pas pour d'autres jours.
+- Le seuil de rentabilité diffère entre le matin (35,1 %) et le soir (30,5 %) : l'expérience mesure un effet moyen
+  et ne peut pas les distinguer (deux analyses séparées auraient moitié moins d'unités).
+- Une décision qui bascule pour quelques dixièmes de point (sensibilité à +25 % : borne haute de 32,0 % contre un seuil
+  de 31,6 %) n'est pas fiable.
 
 ## Leçons pour une prochaine expérience
 
@@ -257,4 +278,4 @@ python experiments/03_power_curve.py
 | Jour 13, après l'A/A | Ajout de la méthode retenue (répartition par strate et régression) |
 | Jour 13, après l'examen des unités extrêmes | Ajout de l'analyse de sensibilité exploratoire (6 unités retirées). Décision prise avant toute injection d'effet |
 | Jour 14 | Injection des effets (0 %, +5 %, +15 %, +25 %), analyse sur la répartition réelle, courbe de puissance. Analyse principale inchangée |
-| Jour 15 | À compléter : coût par course supplémentaire, règle de décision, conclusion |
+| Jour 15 | Seuil de rentabilité (31,6 %), règle de décision à trois issues, probabilités de décision par simulation, rapport final. Analyse principale inchangée |
