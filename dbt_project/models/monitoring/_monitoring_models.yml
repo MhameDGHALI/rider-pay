@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: dq_daily_metrics
+    description: >
+      Indicateurs quotidiens de santé des données, une ligne par jour et par opérateur : volume, parts de courses
+      signalées, de chronologies incohérentes et de courses avec frais de congestion, rémunération moyenne et marge
+      de la plateforme (courses propres). disruption_reason donne l'événement attendu du jour (jour férié, forte neige,
+      lendemain de l'un ou de l'autre), déduit du calendrier et de la météo, jamais des volumes.
+    columns:
+      - name: metric_key
+        description: "Clé du grain : date et opérateur."
+        data_tests:
+          - unique
+          - not_null
+      - name: nb_trips
+        description: "Nombre de courses du jour (toutes les courses, propres ou non)."
+        data_tests:
+          - not_null
+      - name: disruption_reason
+        description: "heavy_snow, holiday, day_after_snow ou day_after_holiday. Vide pour un jour ordinaire."
+        data_tests:
+          - accepted_values:
+              values: ['heavy_snow', 'holiday', 'day_after_snow', 'day_after_holiday']
+      - name: is_expected_disruption
+        description: "Vrai si le jour est un événement attendu : une anomalie ce jour-là est une information, pas une alerte."
+        data_tests:
+          - not_null
+      - name: share_flagged
+        description: "Part des courses signalées comme anormales (is_clean_trip faux)."
+        data_tests:
+          - not_null
+      - name: avg_clean_driver_pay_usd
+        description: "Rémunération moyenne par course propre, en dollars (le coût du travail par course)."
+        data_tests:
+          - not_null
+      - name: platform_margin_rate
+        description: "Marge de la plateforme : 1 moins rémunération sur tarif de base, courses propres. Approximative."

@@ -18,7 +18,7 @@ vars:
   congestion_zone_threshold: 0.95
   congestion_zone_min_trips: 100
   exp_seed: "switchback_v1"
-
+  dq_snow_day_cm: 8
 models:
   rider_pay:
     staging:
@@ -36,6 +36,9 @@ models:
     experiments:
       +materialized: table
       +schema: experiments
+    monitoring:
+      +materialized: table
+      +schema: monitoring
 
 seeds:
   rider_pay:

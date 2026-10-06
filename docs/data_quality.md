@@ -64,3 +64,15 @@ et inférieurs à 0,03 point sur la répartition par quartier.
 - Cause de la concentration des anomalies de rémunération le 25 janvier : non établie.
 - Cause des demandes postérieures à la prise en charge : non établie.
 - 22 598 désaccords entre zone aéroport et frais d'aéroport : non expliqués.
+
+## Surveillance continue
+
+Un modèle dbt (`dq_daily_metrics`) calcule 6 indicateurs par jour et par opérateur. Le détecteur (`monitoring/detect.py`)
+compare chaque jour aux autres jours de même type avec un score robuste. Les anomalies un jour d'événement attendu
+(jour férié, forte neige, lendemain) sont des informations ; les autres sont des alertes.
+
+Le détecteur est validé sur des séries simulées avec des anomalies injectées (`monitoring/test_detect.py`).
+Le rapport de la dernière exécution est dans `docs/data_health_report.md`.
+
+Limite : la référence est construite sur la même période de 59 jours. Une dérive qui toucherait tous les jours
+ne serait pas vue.
