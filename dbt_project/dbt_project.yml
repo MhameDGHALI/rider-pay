@@ -11,3 +11,18 @@ snapshot-paths: ["snapshots"]
 
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
+
+models:
+  rider_pay:
+    staging:
+      +materialized: view
+      +schema: staging
+
+seeds:
+  rider_pay:
+    taxi_zone_lookup:
+      +column_types:
+        LocationID: int64
+        Borough: string
+        Zone: string
+        service_zone: string

@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Données brutes chargées par les scripts d'ingestion (jour 2). Aucune transformation."
+    schema: raw
+    tables:
+      - name: hvfhv_trips
+        description: "Échantillon de 30 % des courses HVFHS (Uber, Lyft) de janvier-février 2026. Les heures sont locales (New York) mais typées TIMESTAMP au chargement."
+      - name: weather_hourly
+        description: "Météo horaire Open-Meteo, heure locale de New York (DATETIME)."
+      - name: riders_synthetic
+        description: "Riders SYNTHÉTIQUES générés par script (seed 42). Aucune donnée réelle."

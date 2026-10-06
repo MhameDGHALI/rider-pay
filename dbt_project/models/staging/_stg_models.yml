@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: stg_weather_hourly
+    description: "Météo horaire, une ligne par heure locale de New York. Renommage et typage uniquement."
+    columns:
+      - name: observed_at
+        description: "Heure locale (DATETIME), clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: temperature_c
+        description: "Température à 2 m, en degrés Celsius."
+        data_tests:
+          - not_null
+      - name: snowfall_cm
+        description: "Neige tombée dans l'heure, en cm."
+        data_tests:
+          - not_null
+
+  - name: stg_riders
+    description: "Parc de riders SYNTHÉTIQUE. Une ligne par rider."
+    columns:
+      - name: rider_id
+        description: "Identifiant du rider, clé de la table."
+        data_tests:
+          - unique
+          - not_null
+      - name: license_num
+        description: "Code opérateur TLC (HV0003 = Uber, HV0005 = Lyft)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['HV0003', 'HV0005']
+      - name: rider_tier
+        description: "Niveau du rider."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['bronze', 'silver', 'gold']
+      - name: tenure_months
+        description: "Ancienneté en mois à la date de référence."
+        data_tests:
+          - not_null
+      - name: signup_date
+        description: "Date d'inscription."
+        data_tests:
+          - not_null
+
+  - name: stg_taxi_zones
+    description: "Zones TLC. Les valeurs 'N/A' sont remplacées par 'Unknown'."
+    columns:
+      - name: location_id
+        description: "Identifiant de zone, clé de la table (le nom de zone n'est pas unique)."
+        data_tests:
+          - unique
+          - not_null
+      - name: borough
+        description: "Quartier (borough)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Bronx', 'Brooklyn', 'EWR', 'Manhattan', 'Queens', 'Staten Island', 'Unknown']
+      - name: zone_name
+        description: "Nom de la zone."
+        data_tests:
+          - not_null
+      - name: service_zone
+        description: "Type de zone de service TLC."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Boro Zone', 'Yellow Zone', 'Airports', 'EWR', 'Unknown']
