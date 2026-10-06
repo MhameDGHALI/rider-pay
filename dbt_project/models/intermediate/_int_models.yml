@@ -31,11 +31,11 @@ models:
       - name: driver_earnings_with_tips_usd
         description: "driver_pay + pourboire. À confirmer : cela suppose que driver_pay n'inclut pas le pourboire (voir le dictionnaire TLC)."
       - name: seconds_request_to_on_scene
-        description: "Secondes entre la demande du client et l'arrivée du chauffeur sur place."
+        description: "Secondes entre la demande et on_scene_at. À utiliser uniquement si has_timeline_anomaly est faux, et en médiane : valeurs extrêmes observées de -17 h à +27 h. Le dictionnaire TLC réserve on_scene_datetime aux véhicules accessibles, mais la donnée est remplie pour toutes les courses."
       - name: seconds_on_scene_to_pickup
         description: "Secondes entre l'arrivée du chauffeur et la prise en charge du client."
       - name: seconds_request_to_pickup
-        description: "Secondes entre la demande du client et sa prise en charge."
+        description: "Secondes entre la demande du client et sa prise en charge. Pour 1,34 % des courses, request_at est postérieur à pickup_at (valeur négative) : filtrer sur has_timeline_anomaly = faux et utiliser la médiane."
       - name: has_negative_driver_pay
         description: "Rémunération négative."
       - name: has_zero_driver_pay
@@ -49,8 +49,8 @@ models:
       - name: has_inconsistent_duration
         description: "trip_seconds diffère de plus d'une seconde de l'écart entre prise en charge et dépose."
       - name: has_timeline_anomaly
-        description: "Chronologie incohérente : demande après l'arrivée, ou arrivée après la prise en charge. Non inclus dans is_clean_trip tant que son volume n'est pas mesuré."
+        description: "Chronologie incohérente : demande après on_scene_at, ou on_scene_at après la prise en charge. Environ 1,8 % des courses, presque toujours à cause de request_at (demande après la prise en charge pour 1,34 % des courses). Exclu de is_clean_trip : il faut le filtrer séparément dans les analyses d'attente."
       - name: is_clean_trip
-        description: "Vrai si aucun des six premiers indicateurs d'anomalie n'est levé. À utiliser pour les moyennes et comparaisons."
+        description: "Vrai si aucun des six premiers indicateurs d'anomalie (montants, distance, durée) n'est levé. Ne couvre PAS la chronologie : pour une analyse d'attente, filtrer aussi has_timeline_anomaly = faux."
         data_tests:
           - not_null
