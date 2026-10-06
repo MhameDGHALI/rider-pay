@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: sim_trip_segments
+    description: >
+      Courses propres regroupées par segment (opérateur, neige, heure, semaine ou week-end,
+      zone à frais élevé, aéroport). Au plus 768 lignes. Sert de base à la simulation : les règles
+      s'appliquent aux segments, avec des sommes additives.
+    columns:
+      - name: segment_key
+        description: "Clé du grain du segment."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: sim_scenario_segment_bonus
+    description: >
+      Bonus simulé par scénario et par segment. Les règles d'un même scénario se cumulent.
+      Les bonus en pourcentage s'appliquent à la rémunération réelle (pas de composition).
+    columns:
+      - name: scenario_segment_key
+        description: "Clé du grain : scénario et segment."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: sim_scenario_comparison
+    description: >
+      Une ligne par scénario : coût du bonus, rémunération totale, coût par course et
+      augmentation par rapport à la situation actuelle. Coût STATIQUE : aucune réaction du
+      comportement des chauffeurs n'est modélisée. Montants relatifs à l'échantillon de 30 %.
+    columns:
+      - name: scenario_id
+        description: "Identifiant du scénario, clé."
+        data_tests:
+          - unique
+          - not_null

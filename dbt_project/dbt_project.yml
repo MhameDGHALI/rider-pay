@@ -29,6 +29,9 @@ models:
     marts:
       +materialized: table
       +schema: marts
+    simulation:
+      +materialized: table
+      +schema: simulation
 
 seeds:
   rider_pay:
@@ -42,3 +45,25 @@ seeds:
       +column_types:
         license_num: string
         operator_name: string
+    sim_scenarios:
+      +column_types:
+        scenario_id: string
+        scenario_label: string
+        is_baseline: int64
+    sim_rules:
+      +column_types:
+        rule_id: string
+        rule_label: string
+        snow_condition: string
+        day_type: string
+        hour_from: int64
+        hour_to: int64
+        zone_condition: string
+        airport_condition: string
+        operator: string
+        bonus_type: string
+        bonus_value: float64
+    sim_scenario_rules:
+      +column_types:
+        scenario_id: string
+        rule_id: string

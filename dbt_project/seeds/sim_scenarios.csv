@@ -1,0 +1,7 @@
+scenario_id,scenario_label,is_baseline
+BASE,Current situation (no extra bonus),1
+SNOW_15,Snow bonus 15 pct of pay,0
+SNOW_165,Snow bonus 16.5 pct of pay (+10 pct of the bonus),0
+PEAK_150,Weekday peak bonus 1.50 per trip,0
+ZONE_100,High fee zone bonus 1.00 per trip,0
+COMBINED,Snow 15 pct + weekday peak 1.50 + high fee zone 1.00,0

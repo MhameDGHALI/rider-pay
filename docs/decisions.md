@@ -13,3 +13,8 @@ Les décisions marquées « à confirmer » reposent sur une hypothèse que je n
 | 4 | 3 | Zones TLC chargées comme seed dbt, avec `N/A` remplacé par `Unknown` | Petit fichier de référence (265 lignes) versionné dans le dépôt. Les valeurs `N/A` des zones 264 et 265 sont ambiguës : après normalisation, les tests `not_null` et `accepted_values` sont fiables. | Charger les zones par script dans `raw` ; garder `N/A` tel quel |
 | 5 | 3-4 | Staging fidèle : aucune ligne supprimée, les anomalies sont signalées plus tard | Le staging copie la source en renommant et en typant. Filtrer à ce niveau perdrait de l'information de façon irréversible et fausserait les réconciliations. La logique métier est dans la couche intermediate. | Supprimer les courses anormales dès le staging |
 | 6 | 4 | Tests en `error` ou en `warn` selon la gravité | Une erreur bloque quand la table est inutilisable (clé dupliquée, heure de prise en charge vide). Un avertissement signale une anomalie à examiner sans bloquer : les 21
+| 24 | 11 | Règles de bonus et scénarios écrits dans des seeds | | |
+| 25 | 11 | Simulation sur des segments (768 lignes au plus) plutôt que sur 12 M de courses | | |
+| 26 | 11 | Règles d'un scénario cumulées, bonus en pourcentage appliqués à la rémunération réelle | | |
+| 27 | 11 | Coût statique : aucune réaction du comportement des chauffeurs | | |
+| 28 | 11 | Règles de bonus = hypothèses, rémunération de base = donnée réelle | | |

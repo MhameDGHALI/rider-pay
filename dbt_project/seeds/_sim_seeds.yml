@@ -1,0 +1,75 @@
+version: 2
+
+seeds:
+  - name: sim_scenarios
+    description: "Scénarios de simulation de bonus. HYPOTHÈSES de travail, pas des règles réelles."
+    columns:
+      - name: scenario_id
+        description: "Identifiant du scénario, clé."
+        data_tests:
+          - unique
+          - not_null
+      - name: is_baseline
+        description: "1 pour la situation actuelle (aucun bonus ajouté), 0 sinon."
+
+  - name: sim_rules
+    description: "Règles de bonus. Chaque règle a des conditions (neige, type de jour, heures, zone, aéroport, opérateur) et un montant. HYPOTHÈSES de travail."
+    columns:
+      - name: rule_id
+        description: "Identifiant de la règle, clé."
+        data_tests:
+          - unique
+          - not_null
+      - name: snow_condition
+        description: "any = toujours ; snow = seulement les heures de neige."
+        data_tests:
+          - accepted_values:
+              values: ['any', 'snow']
+      - name: day_type
+        description: "any, weekday (semaine) ou weekend."
+        data_tests:
+          - accepted_values:
+              values: ['any', 'weekday', 'weekend']
+      - name: zone_condition
+        description: "any ou high_fee_zone (zone de départ à frais de congestion élevé, règle empirique)."
+        data_tests:
+          - accepted_values:
+              values: ['any', 'high_fee_zone']
+      - name: airport_condition
+        description: "any ou airport (départ ou arrivée en zone aéroport)."
+        data_tests:
+          - accepted_values:
+              values: ['any', 'airport']
+      - name: operator
+        description: "any ou le code de licence de l'opérateur."
+        data_tests:
+          - accepted_values:
+              values: ['any', 'HV0003', 'HV0005']
+      - name: bonus_type
+        description: "pct_of_pay (pourcentage de la rémunération) ou flat_per_trip (montant fixe par course)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['pct_of_pay', 'flat_per_trip']
+      - name: bonus_value
+        description: "Taux (0,15 = 15 %) ou montant en dollars selon bonus_type."
+        data_tests:
+          - not_null
+
+  - name: sim_scenario_rules
+    description: "Correspondance scénario - règles. Un scénario cumule les règles qui lui sont rattachées. La situation actuelle n'a aucune règle."
+    columns:
+      - name: scenario_id
+        description: "Scénario."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('sim_scenarios')
+              field: scenario_id
+      - name: rule_id
+        description: "Règle rattachée au scénario."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('sim_rules')
+              field: rule_id
