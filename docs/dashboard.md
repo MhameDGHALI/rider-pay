@@ -13,7 +13,7 @@ Fichier : `dashboards/rider_pay.pbix`. Mode Import. Source : BigQuery, tables ag
 | sim_scenario_comparison, sim_scenario_rule_bonus, sim_snow_sensitivity | dbt_dev_simulation | Simulateur |
 | incidents_acquittes | CSV du dépôt (`monitoring/acknowledged_alerts.csv`) | Registre des incidents |
 
-`fct_trips` (12,2 M de lignes) n'est pas importée : les agrégats suffisent. 7 relations, [N] mesures.
+`fct_trips` (12,2 M de lignes) n'est pas importée : les agrégats suffisent. 7 relations.
 
 ## Pages
 

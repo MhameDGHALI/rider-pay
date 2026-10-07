@@ -2,33 +2,46 @@
 
 ![CI](https://github.com/MhameDGHALI/rider-pay/actions/workflows/ci.yml/badge.svg)
 
-Plateforme analytics (BigQuery, dbt, Python) construite sur 12,2 millions de courses VTC de New York,
-pour mesurer le coût de la rémunération des chauffeurs avec des contrôles de qualité à chaque couche.
+**In short.** An analytics-engineering project on 12.2M Uber and Lyft trips (30% sample of NYC TLC data, Jan-Feb 2026):
+BigQuery and dbt (staging, marts, [161] tests, reconciliation at every layer), a config-driven bonus simulator, a switchback
+experiment design with power analysis and a break-even decision rule (the bonus effect is **simulated**), a data-quality monitor
+that found three source incidents holding 83% of all flagged trips, and a 3-page Power BI dashboard whose figures are reconciled
+against BigQuery.
 
-> **Statut : projet en cours.** Les couches de données (staging, intermediate, marts), leurs tests et leurs
-> réconciliations sont terminés. Le simulateur d'incitations, l'analyse A/B, l'intégration continue,
-> le dashboard Power BI et l'assistant IA sont à venir (voir « Prochaines étapes »).
+Plateforme analytics (BigQuery, dbt, Python, Power BI) construite sur 12,2 millions de courses VTC de New York, pour mesurer le coût
+de la rémunération des chauffeurs, simuler des changements de bonus, tester leur effet et surveiller la qualité des données.
 
-## Contexte et question business
+> **Statut : projet terminé.** [Piste non réalisée : un assistant text-to-SQL avec évaluation chiffrée, écarté pour des raisons de coût et de temps (voir `docs/decisions.md`).]
 
-Dans une marketplace de livraison ou de VTC, la rémunération des chauffeurs est un poste de coût important.
-Avant de modifier un bonus, une équipe doit répondre à trois questions : combien cela coûte, quel effet cela
-a, et peut-on se fier aux chiffres ? Ce projet construit les données nécessaires pour y répondre, à partir de
-courses publiques de New York (Uber, Lyft).
+## Question business
+
+Avant de modifier un bonus de rémunération, une équipe doit répondre à quatre questions : combien cela coûte, quel effet cela a,
+cela rapporte-t-il plus que cela ne coûte, et peut-on se fier aux chiffres ? Ce projet construit ce qu'il faut pour y répondre.
+
+## Ce que le projet montre
+
+1. **Les données se réconcilient.** Les 12 244 353 courses sont retrouvées à l'identique de la source brute aux agrégats finaux,
+   avec les totaux financiers, grâce à des tests à chaque couche.
+2. **Les anomalies sont concentrées.** 35 087 courses (0,29 %) sont signalées, jamais supprimées. 83 % d'entre elles tiennent dans
+   trois journées d'incident de la source (Lyft les 22 et 23 janvier, Uber le 25 janvier) ; hors de ces journées, 0,05 %.
+3. **Un bonus de pointe coûte cher.** À 1,50 $ par course, il ajoute environ [5,76 M$] à la rémunération de l'échantillon
+   (+[2,33] %) et, pour être rentable, il doit faire augmenter les courses d'au moins **31,6 %**.
+4. **Une expérience de 78 unités ne tranche pas partout.** L'effet du bonus est simulé : l'expérience valide une méthode. Elle décide
+   de façon fiable seulement si l'effet vrai est inférieur à environ 10 % (abandon) ou supérieur à environ 60 % (adoption).
+5. **La surveillance retrouve les incidents.** Un détecteur à score robuste a signalé les trois incidents réels, sans fausse alerte
+   sur la période, et a été validé par injection d'anomalies connues.
 
 ## Avancement
 
 | Bloc | Statut |
 |---|---|
 | Ingestion (échantillon, chargement BigQuery) | Fait |
-| Staging, intermediate, marts (schéma en étoile) | Fait |
-| Tests et réconciliation à chaque couche | Fait |
-| Mesure du coût des requêtes | Fait |
-| Simulateur d'incitations | À venir |
-| Analyse A/B | À venir |
-| Intégration continue (GitHub Actions) | À venir |
-| Dashboard Power BI | À venir |
-| Assistant IA | À venir |
+| Staging, intermediate, marts (schéma en étoile), tests et réconciliations | Fait |
+| Simulateur d'incitations | Fait |
+| Expérimentation (switchback, A/A, puissance, seuil de rentabilité) | Fait |
+| Surveillance de la qualité des données | Fait |
+| Intégration continue (GitHub Actions) | [Fait / Niveau 1 fait, build complet non validé : raison] |
+| Tableau de bord Power BI (3 pages, [+ accueil]) | Fait |
 
 ## Sources de données
 
@@ -36,11 +49,13 @@ courses publiques de New York (Uber, Lyft).
 |---|---|---|
 | NYC TLC, High Volume For-Hire Vehicle | Réelle | Courses Uber et Lyft, janvier-février 2026 |
 | NYC TLC, taxi zone lookup | Réelle | 265 zones et quartiers |
-| Open-Meteo (archive) | Réelle | Météo horaire (une station pour toute la ville) |
-| Table des riders | **Synthétique** | 5 000 riders générés (seed 42), non utilisés à ce stade |
+| Open-Meteo (archive) | Réelle | Météo horaire, une station pour toute la ville |
+| Règles de bonus et scénarios | **Hypothèses** | Seeds dbt |
+| Effet du bonus dans l'expérience | **Simulé** | Ajouté au nombre de courses des unités test |
+| Table des riders | **Synthétique** | 5 000 riders générés, [non utilisés par l'expérience] |
 
 Les données TLC sont publiques : https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
-Météo : https://open-meteo.com (vérifier les conditions d'utilisation et d'attribution sur leur site).
+Météo : Open-Meteo (https://open-meteo.com) ; vérifie leurs conditions d'utilisation et ajoute l'attribution qu'elles exigent.
 
 ## Architecture
 
@@ -52,99 +67,103 @@ flowchart LR
     C --> D["dbt : staging"]
     D --> E["dbt : intermediate"]
     E --> F["dbt : marts (faits, dimensions, agrégats)"]
+    F --> G["dbt : simulateur (seeds)"]
+    F --> H["dbt : expérimentation"]
+    F --> Q["dbt : indicateurs de santé"]
+    H --> P["Python : analyse, puissance, décision"]
+    Q --> R["Python : détecteur d'anomalies"]
+    F --> BI["Power BI"]
+    G --> BI
+    Q --> BI
+    CI["GitHub Actions"] -.-> D
+    CI -.-> R
 ```
 
-Schéma en étoile : `fct_trips` (une ligne par course) reliée à `dim_zone` (départ et arrivée),
-`dim_date`, `dim_operator` et `dim_weather_hour`. Trois agrégats alimenteront le dashboard :
-`agg_daily_operator`, `agg_zone_hour` et `agg_zone_congestion`.
+Schéma en étoile : `fct_trips` (une ligne par course) reliée à `dim_zone`, `dim_date`, `dim_operator` et `dim_weather_hour`, plus trois
+agrégats pour le BI.
 
 ## Chiffres clés
 
-- 12 244 353 courses (échantillon aléatoire de 30 %, seed 42), 59 jours, 2 opérateurs
-- 14 modèles dbt, 2 seeds, 95 tests
+
+- 12 244 353 courses, 59 jours, 2 opérateurs
+- [23] modèles dbt, [7] seeds, [161] tests
 - Écarts de l'échantillon par rapport aux fichiers complets : moins de 0,1 % sur les moyennes
+- Requête d'une journée : 1,47 Mo sur la table partitionnée contre 373,68 Mo sur la vue source
+
+## Tableau de bord Power BI
+
+
+- Fichier : [dashboards/rider_pay.pbix](dashboards/rider_pay.pbix) (Power BI Desktop, Windows)
+- Version PDF : [docs/rider_pay_dashboard.pdf](docs/rider_pay_dashboard.pdf)
+- Détail du modèle et des mesures : [docs/dashboard.md](docs/dashboard.md)
+
+| Page | Question | Ce qu'on y lit |
+|---|---|---|
+| 1. Trips Economy | Combien gagne un chauffeur par course, et que garde la plateforme ? | Rémunération moyenne de [20,21] $ par course propre, part plateforme approximative de [22,89] %, matrice heure × quartier |
+| 2. Incentive Simulaotor | Combien coûte un bonus, et de quoi ce coût dépend-il ? | Coût par scénario, décomposition par règle (intensité × étendue), sensibilité du bonus neige |
+| 3. Data quality | Peut-on se fier aux chiffres, et où sont les incidents ? | [83] % des courses signalées dans trois journées d'incident, [0,05] % hors de ces journées |
+
+![Page 1 : Trip Economics](docs/img/dashboard_01_economy.png)
+
+![Page 2 : Incentive Simulator](docs/img/dashboard_02_simulator.png)
+
+![Page 3 : Data quality](docs/img/dashboard_03_quality.png)
+
+![Data model](docs/img/dashboard_model.png)
+
+**Limites du tableau de bord** : les segmenteurs Opérateur et Mois ne filtrent pas les visuels de zones (ces agrégats n'ont ni date ni
+opérateur) ; le coût du simulateur est statique ; « rémunération par heure de course » n'est pas un salaire horaire.
+
+## Les blocs en détail
+
+| Bloc | Document |
+|---|---|
+| Choix de conception et alternatives écartées | [docs/decisions.md](docs/decisions.md) |
+| Qualité des données et incidents | [docs/data_quality.md](docs/data_quality.md) |
+| Coût des requêtes | [docs/benchmark.md](docs/benchmark.md) |
+| Simulateur d'incitations | [docs/simulator.md](docs/simulator.md) |
+| Plan d'expérience | [docs/experiment_design.md](docs/experiment_design.md) |
+| Rapport d'expérimentation | [docs/experiment_report.md](docs/experiment_report.md) |
+| Surveillance et détecteur | [docs/monitoring.md](docs/monitoring.md) |
+| Intégration continue | [docs/ci.md](docs/ci.md) |
+| Tableau de bord | [docs/dashboard.md](docs/dashboard.md) |
+| Note de cadrage (1 page) | [docs/note_de_cadrage.md](docs/note_de_cadrage.md) |
 
 ## Choix techniques
 
-Le détail et les alternatives écartées sont dans [docs/decisions.md](docs/decisions.md). Les principaux :
-
 - **Échantillon de 30 %** pour tenir dans les limites du sandbox BigQuery, avec un contrôle de représentativité.
 - **Anomalies signalées, jamais supprimées** : des indicateurs (`has_*`, `is_clean_trip`) permettent de les isoler.
-- **Heures locales** : les horodatages TLC n'ont pas de fuseau ; ils sont convertis de TIMESTAMP en DATETIME
-  sans décalage pour joindre correctement la météo.
+- **Heures locales** : les horodatages TLC n'ont pas de fuseau ; ils sont convertis sans décalage pour joindre la météo.
 - **Partitionnement par plage d'entiers** : le sandbox supprime les partitions par date après 60 jours.
 - **Agrégats additifs** : sommes et compteurs, les ratios sont recalculés à partir des sommes.
-
-## Qualité des données
-
-Chaque passage d'une couche à l'autre est contrôlé par un test de réconciliation, plus un test de bout en bout
-de la source brute aux agrégats. 
-35 087 courses (0,29 %) sont signalées comme anormales, dont 83 % se concentrent sur trois journées d'incident (25 janvier
-chez Uber, 22 et 23 janvier chez Lyft) ; hors de ces journées, 0,05 %. 1,82 % des courses ont une chronologie incohérente.
-Un détecteur d'anomalies retrouve ces trois incidents sans fausse alerte sur la période.
-. Détail dans [docs/data_quality.md](docs/data_quality.md).
-
-## Coût des requêtes
-
-Pour une requête sur une journée, la table de faits partitionnée lit 1,47 Mo contre 373,68 Mo pour la vue source.
-Méthode, décomposition et limites dans [docs/benchmark.md](docs/benchmark.md).
-
-## Expérimentation (switchback)
-
-Un bonus de pointe en semaine est testé par une expérience de type switchback : des plages (jour de semaine x matin ou soir)
-sont réparties au hasard entre test et contrôle sur toute la ville. L'effet du bonus est **simulé** (aucune donnée de bonus
-n'existe) : l'expérience valide une méthode, elle ne mesure pas un effet réel. Détail dans [docs/experiment_report.md](docs/experiment_report.md).
-
-- Répartition stratifiée et reproductible dans dbt, test A/A (faux positifs de 4,6 %), analyse par régression.
-- Effet minimal détectable : 16,5 % avec les 78 unités, 5,7 % hors six unités perturbées (tempêtes, jours fériés).
-- Seuil de rentabilité : 31.6 % de courses en plus (marge approximative). Règle de décision à trois issues.
-- Un résultat significatif issu d'un tirage peu puissant surestime l'effet : un vrai +5 % est estimé à +15,5 % sur la répartition réelle.
-
-## Surveillance de la qualité des données
-
-Un modèle dbt calcule 6 indicateurs quotidiens par opérateur ; un détecteur à score robuste (médiane et écart absolu médian)
-signale les anomalies. Les événements attendus (jours fériés, forte neige) expliquent la demande mais pas la qualité des
-données. Les alertes examinées sont acquittées dans un journal versionné. Le détecteur est validé sur des séries simulées
-avec des anomalies injectées, et sa sensibilité est mesurée sur les vraies données. Détail dans
-[docs/monitoring.md](docs/monitoring.md).
-
-## Intégration continue
-
-Chaque modification déclenche des contrôles gratuits (syntaxe, tests du détecteur d'anomalies, `dbt parse`). Un build complet
-(`dbt build`, 191 éléments) suivi de la surveillance de la qualité des données tourne chaque lundi ou à la demande, et envoie
-un e-mail d'échec s'il reste une alerte. Détail et limites dans [docs/ci.md](docs/ci.md).
+- **Switchback plutôt qu'un A/B par chauffeur** : les chauffeurs d'une même zone se partagent les commandes.
+- **Détecteur robuste** (médiane et écart absolu médian) : les jours exceptionnels ne faussent pas le « normal ».
 
 ## Limites
 
-- L'échantillon fait environ 30 % des courses : les volumes et totaux ne représentent pas la réalité,
-  les moyennes et ratios restent valables.
-- Les données TLC n'ont pas d'identifiant de chauffeur : les riders et, plus tard, l'expérience A/B sont synthétiques.
-  Leurs résultats illustreront une méthode, pas un effet réel.
-- La marge plateforme (tarif de base moins rémunération) est une approximation : le tarif exclut les taxes et frais.
-- La météo vient d'une seule station pour toute la ville.
-- 1,82 % des courses ont une chronologie incohérente (voir le rapport de qualité).
-- Le sandbox BigQuery supprime les tables après 60 jours : le projet se reconstruit en quelques commandes.
+- L'échantillon fait environ 30 % des courses : les volumes et totaux ne représentent pas la réalité, les moyennes et ratios restent valables.
+- Les données TLC n'ont pas d'identifiant de chauffeur ; l'expérience repose sur des jours et des blocs horaires, avec un effet **simulé**.
+- Le simulateur calcule un **coût statique** : il ne dit rien du comportement des chauffeurs.
+- La marge plateforme (tarif de base moins rémunération) est une **approximation**.
+- Une seule station météo pour toute la ville ; 78 unités seulement dans l'expérience.
+- Le sandbox BigQuery supprime les tables après 60 jours (la table brute le 5 décembre 2026) : le projet se reconstruit par script, et le fichier Power BI garde les données importées.
+- Le détecteur compare chaque jour à la même période de 59 jours : une dérive lente ne serait pas vue.
 
-L'effet du bonus est simulé : l'expérimentation valide une méthode. La marge utilisée pour la rentabilité est approximative.
 ## Comment reproduire le projet
 
 Versions utilisées : Python 3.13, dbt-core 1.12.5, dbt-bigquery 1.12.1.
 
 1. Créer un projet Google Cloud avec le sandbox BigQuery (sans facturation) et installer le Google Cloud CLI.
-2. Cloner le dépôt, créer l'environnement et installer les paquets :
+2. Cloner le dépôt, créer l'environnement :
 ```
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
    pip install -r requirements.txt
 ```
-3. Télécharger depuis la page TLC `fhvhv_tripdata_2026-01.parquet` et `fhvhv_tripdata_2026-02.parquet`
-   dans `data/raw`, et `taxi_zone_lookup.csv` dans `data/reference`.
-4. Se connecter et renseigner le projet :
-```
-   gcloud auth application-default login
-```
-   puis éditer `PROJECT_ID` dans `ingestion/config.py`.
-5. Lancer l'ingestion :
+3. Télécharger depuis la page TLC `fhvhv_tripdata_2026-01.parquet` et `fhvhv_tripdata_2026-02.parquet` dans `data/raw`,
+   et `taxi_zone_lookup.csv` dans `data/reference`.
+4. `gcloud auth application-default login`, puis renseigner l'identifiant du projet (variable `GCP_PROJECT_ID` ou `ingestion/config.py`).
+5. Ingestion :
 ```
    python ingestion/01_sample_hvfhv.py
    python ingestion/02_check_sample.py
@@ -152,21 +171,35 @@ Versions utilisées : Python 3.13, dbt-core 1.12.5, dbt-bigquery 1.12.1.
    python ingestion/04_load_weather.py
    python ingestion/05_generate_riders.py
 ```
-6. Copier `docs/profiles.example.yml` vers `~/.dbt/profiles.yml` et renseigner le Project ID.
+6. Copier `docs/profiles.example.yml` vers `~/.dbt/profiles.yml` et renseigner l'identifiant du projet.
 7. Construire et tester :
 ```
    cd dbt_project
    dbt seed
    dbt build
 ```
+8. Expérimentation et surveillance :
+```
+   python experiments/01_aa_test.py
+   python experiments/02_effect_analysis.py
+   python experiments/03_power_curve.py
+   python experiments/04_decision_analysis.py
+   python monitoring/run_checks.py
+```
+
+## Structure du dépôt
+
+```
+ingestion/      chargement des données
+dbt_project/    modèles, seeds, macros, tests
+experiments/    analyse de l'expérience (Python)
+monitoring/     détecteur d'anomalies, registre des alertes, tests
+dashboards/     fichier Power BI et thème
+docs/           documentation et rapports
+.github/        workflows d'intégration continue
+```
 
 ## Méthode de travail
 
-Le code a été écrit avec l'aide d'un assistant IA (Claude) pour la génération et la relecture. Les décisions
-de conception, les contrôles et les interprétations sont documentés dans `docs/decisions.md`.
-
-## Prochaines étapes
-
-> **Statut : projet en cours.** Les couches de données, leurs tests, le mesure de coût des requêtes et le
-> simulateur d'incitations sont terminés.l'intégration continue, le dashboard Power BI et
-> l'assistant IA sont à venir (voir « Prochaines étapes »).
+Le code a été écrit avec l'aide d'un assistant IA (Claude) pour la génération et la relecture. Les décisions de conception, les contrôles
+et les interprétations sont documentés dans `docs/decisions.md`.
