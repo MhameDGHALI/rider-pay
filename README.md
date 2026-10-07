@@ -1,5 +1,7 @@
 # Marketplace Rider Pay & Experimentation Platform
 
+![CI](https://github.com/MhameDGHALI/rider-pay/actions/workflows/ci.yml/badge.svg)
+
 Plateforme analytics (BigQuery, dbt, Python) construite sur 12,2 millions de courses VTC de New York,
 pour mesurer le coût de la rémunération des chauffeurs avec des contrôles de qualité à chaque couche.
 
@@ -105,6 +107,12 @@ signale les anomalies. Les événements attendus (jours fériés, forte neige) e
 données. Les alertes examinées sont acquittées dans un journal versionné. Le détecteur est validé sur des séries simulées
 avec des anomalies injectées, et sa sensibilité est mesurée sur les vraies données. Détail dans
 [docs/monitoring.md](docs/monitoring.md).
+
+## Intégration continue
+
+Chaque modification déclenche des contrôles gratuits (syntaxe, tests du détecteur d'anomalies, `dbt parse`). Un build complet
+(`dbt build`, 191 éléments) suivi de la surveillance de la qualité des données tourne chaque lundi ou à la demande, et envoie
+un e-mail d'échec s'il reste une alerte. Détail et limites dans [docs/ci.md](docs/ci.md).
 
 ## Limites
 
