@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Contrôles sans accès à BigQuery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Afficher les versions
+        run: |
+          python --version
+          dbt --version
+
+      - name: Vérifier la syntaxe des scripts Python
+        run: python -m compileall -q ingestion experiments monitoring
+
+      - name: Tests du détecteur d'anomalies
+        run: python monitoring/test_detect.py
+
+      - name: Tests de l'acquittement des alertes
+        run: python monitoring/test_alerting.py
+
+      - name: Écrire un profil dbt factice (aucune connexion)
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<'EOF'
+          rider_pay:
+            target: ci
+            outputs:
+              ci:
+                type: bigquery
+                method: oauth
+                project: projet-factice
+                dataset: dbt_ci
+                location: US
+                threads: 1
+          EOF
+
+      - name: Analyser le projet dbt (YAML, références, macros)
+        working-directory: dbt_project
+        run: dbt parse

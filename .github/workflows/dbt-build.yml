@@ -1,0 +1,82 @@
+name: Build dbt et surveillance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"   # chaque lundi à 06:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dbt-build
+  cancel-in-progress: false
+
+env:
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+
+jobs:
+  build:
+    name: dbt build puis contrôle de santé des données
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Authentification Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Écrire le profil dbt
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          rider_pay:
+            target: ci
+            outputs:
+              ci:
+                type: bigquery
+                method: oauth
+                project: ${GCP_PROJECT_ID}
+                dataset: dbt_dev
+                location: US
+                threads: 4
+                job_execution_timeout_seconds: 600
+          EOF
+
+      - name: Vérifier la connexion à BigQuery
+        working-directory: dbt_project
+        run: dbt debug
+
+      - name: dbt build
+        working-directory: dbt_project
+        run: dbt build
+
+      - name: Contrôle de santé des données
+        run: python monitoring/run_checks.py --fail
+
+      - name: Afficher le rapport dans le résumé du run
+        if: always()
+        run: |
+          if [ -f docs/data_health_report.md ]; then cat docs/data_health_report.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Conserver les résultats
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultats-dbt
+          path: |
+            dbt_project/target/run_results.json
+            docs/data_health_report.md
+          if-no-files-found: ignore

@@ -22,3 +22,8 @@ data/processed/
 
 # Power BI (optionnel)
 # *.pbix
+
+# Clés de comptes de service : ne jamais versionner
+keys/
+*-sa-key*.json
+github-ci*.json
